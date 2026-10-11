@@ -1,0 +1,83 @@
+space: ${{ maps[inputs.environment].space }}
+
+inputs:
+  - id: service_name
+    name: Service name
+    description: Lowercase letters, digits, and hyphens, e.g. checkout
+    type: short_text
+    validations:
+      required: true
+      pattern: "^[a-z][a-z0-9-]{1,40}$"
+  - id: environment
+    name: Environment
+    type: select
+    options:
+      - dev
+      - staging
+      - prod
+  - id: size
+    name: Database size
+    type: select
+    default: small
+    options:
+      - small
+      - medium
+      - large
+  - id: owner_team
+    name: Owning team
+    type: short_text
+    validations:
+      required: true
+      pattern: "^[a-z][a-z0-9-]{1,40}$"
+
+maps:
+  dev:
+    space: __NONPROD_SPACE__
+    aws_integration: __AWS_INTEGRATION_ID__
+  staging:
+    space: __NONPROD_SPACE__
+    aws_integration: __AWS_INTEGRATION_ID__
+  prod:
+    space: __PROD_SPACE__
+    aws_integration: __AWS_INTEGRATION_ID__
+
+stacks:
+  - key: postgres
+    name: ${{ inputs.service_name }}-postgres-${{ inputs.environment }}
+    description: Postgres for ${{ inputs.service_name }} (${{ inputs.environment }}), owned by ${{ inputs.owner_team }}
+    labels:
+      - golden-path/postgres
+      - env/${{ inputs.environment }}
+      - team/${{ inputs.owner_team }}
+    autodeploy: true
+    vcs:
+      reference:
+        value: main
+        type: branch
+      repository: spacelift-golden-paths
+      provider: GITHUB
+      namespace: Imoustak
+      project_root: postgres
+    vendor:
+      opentofu:
+        manage_state: true
+        version: "1.10.3"
+    environment:
+      variables:
+        - name: TF_VAR_service_name
+          value: ${{ inputs.service_name }}
+        - name: TF_VAR_environment
+          value: ${{ inputs.environment }}
+        - name: TF_VAR_size
+          value: ${{ inputs.size }}
+        - name: TF_VAR_owner_team
+          value: ${{ inputs.owner_team }}
+    attachments:
+      contexts:
+        - id: aws-network-${{ inputs.environment }}
+          priority: 1
+      clouds:
+        aws:
+          id: ${{ maps[inputs.environment].aws_integration }}
+          read: true
+          write: true
