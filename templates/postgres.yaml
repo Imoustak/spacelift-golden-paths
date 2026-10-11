@@ -32,14 +32,14 @@ inputs:
 
 maps:
   dev:
-    space: __NONPROD_SPACE__
-    aws_integration: __AWS_INTEGRATION_ID__
+    space: golden-paths-nonprod-01M4NED5BE22EH5F8483Z6BHY2
+    aws_integration: 01M4GGRKK7K5PR92Q517DJ8THK
   staging:
-    space: __NONPROD_SPACE__
-    aws_integration: __AWS_INTEGRATION_ID__
+    space: golden-paths-nonprod-01M4NED5BE22EH5F8483Z6BHY2
+    aws_integration: 01M4GGRKK7K5PR92Q517DJ8THK
   prod:
-    space: __PROD_SPACE__
-    aws_integration: __AWS_INTEGRATION_ID__
+    space: golden-paths-prod-01M4NED680Q6K8YXYGM1YF5MYR
+    aws_integration: 01M4GGRKK7K5PR92Q517DJ8THK
 
 stacks:
   - key: postgres
@@ -59,8 +59,9 @@ stacks:
       namespace: Imoustak
       project_root: postgres
     vendor:
-      opentofu:
+      terraform:
         manage_state: true
+        workflow_tool: OPEN_TOFU
         version: "1.10.3"
     environment:
       variables:
